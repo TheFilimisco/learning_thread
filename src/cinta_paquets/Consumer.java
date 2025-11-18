@@ -1,36 +1,38 @@
 package cinta_paquets;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Consumer implements Runnable{
     private int num;
-    private static int counter = 0;
+    private static AtomicInteger counter = new AtomicInteger(0);
     private final ConveyorBelt belt;
 
+    public static AtomicInteger getCounter() {
+        return counter;
+    }
 
     public Consumer(ConveyorBelt belt) {
-        synchronized (Consumer.class){
-            this.belt = belt;
-            this.num = counter++;
-        }
+        this.belt = belt;
+        this.num = counter.incrementAndGet();
     }
 
     @Override
     public void run() {
-        for(int i = 0; i < 20; i++){
+        while (true){
+            char getPackage = belt.popPackage();
+            System.out.println("Consumer " + num + " processed package: " + getPackage);
 
-            String advice = belt.popPackage();
-            if (advice.equalsIgnoreCase("Belt is empty")){
-                System.out.println("Consumer " + num + " waiting." + advice);
-            } else  {
-                System.out.println("Consumer " + num + " pop a packet. " + advice);
+            if(getPackage == Producer.POISON_PILL){
+                System.out.println("Consumer " + num + " is stopping");
+                break;
             }
 
-            try {
+           /* try {
                 Thread.sleep((int) (Math.random() * 300));
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+                Thread.currentThread().interrupt();
+                break;
+            }*/
         }
-
-
     }
 }

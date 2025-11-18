@@ -6,29 +6,39 @@ public class ConveyorBelt {
     private final int MAX_SIZE = 20;
     private Vector capacity = new Vector(30, 10);
 
-    public synchronized String pushPackage (char c){
+
+
+    public synchronized void pushPackage (char c){
         while (capacity.size() == MAX_SIZE){
             try {
                 wait();
-                return "Belt is full";
-            } catch (InterruptedException e) {}
+                System.out.println("Belt is full"); ;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
         }
         capacity.add(c);
         this.notifyAll();
-        return "Capacity is: " + capacity.size();
+        System.out.println("Capacity is: " + capacity.size());
     }
 
-    public synchronized String popPackage (){
+    public synchronized char popPackage (){
         while(capacity.isEmpty()){
             try {
                 wait();
-                return "Belt is empty";
-            } catch (InterruptedException e) {}
+                System.out.println("Belt is empty");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
 
-        capacity.removeLast();
+        char c = (char) capacity.removeLast();
         this.notifyAll();
-        return "Capacity is: " + capacity.size();
+        System.out.println("Capacity is: " + capacity.size());
+        return c;
     }
-
+    public synchronized int getSize() {
+        return capacity.size();
+    }
 }
